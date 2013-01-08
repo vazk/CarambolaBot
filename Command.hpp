@@ -23,8 +23,8 @@ struct Command
         struct DriveCmd 
         {
             uint8_t type;
-            uint8_t left;
-            uint8_t right;
+            int16_t left;
+            int16_t right;
         } drive;
     }; 
 
