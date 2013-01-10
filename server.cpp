@@ -2,18 +2,52 @@
 #include "SerialDevice.hpp"
 #include "DualMotorController.hpp"
 #include "CommandManager.hpp"
+#include "Utils.hpp"
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
 
-void* listenConnection(void *smptr)
+struct Bundle {
+    DualMotorController* dmc;
+    SocketManager* sm;
+    pthread_t * listener;
+};
+
+void* listenerFunc(void* bndp)
 {
-    SocketManager* socketManager = (SocketManager*)smptr;
+    Bundle* bnd = (Bundle*)bndp;
+    SocketManager* socketManager = bnd->sm;
     std::cout<<"INFO: waiting for socket connection..."<<std::endl;
     socketManager->waitForConnection(9999);
     return NULL;
 }
+
+
+void* watchdogFunc(void* bndp)
+{
+    Bundle* bnd = (Bundle*)bndp;
+    DualMotorController* motorController = bnd->dmc;
+    SocketManager* socketManager = bnd->sm;
+    while(true) {
+        usleep(100 * 1000);
+        if(!socketManager->isConnected()) {
+            continue;
+        }
+        uint32_t now = milliseconds();
+        uint32_t lastActivity = socketManager->lastActivityMs();
+        if(now - lastActivity > 2000) {
+            std::cout<<"WARN: nothing received within the last 2s, closing the connection..."<<std::endl;
+            socketManager->close();
+        }
+        if(now - lastActivity > 300) {
+            std::cout<<"WARN: nothing received within the last 300ms, stopping the robot..."<<std::endl;
+            motorController->setSpeeds(0, 0);
+        } 
+    }
+    return NULL;
+}
+
 
 int main()
 {
@@ -43,10 +77,23 @@ int main()
     CommandManager commandManager(socketManager, motorController);
 
 
+    pthread_t watchdogThread, listenerThread;
+
+    Bundle bnd;
+    bnd.dmc = &motorController;
+    bnd.sm = &socketManager;
+    bnd.listener = &listenerThread;
+
+
+    if(pthread_create(&watchdogThread, NULL, watchdogFunc, &bnd)) {
+        std::cerr<<"ERROR: failed to create the watchdog thread..."<<std::endl;
+        return 1;
+    }
+
     // start the main loop
     while(!commandManager.shouldQuit()) {
-        pthread_t listenerThread;
-    	if(pthread_create(&listenerThread, NULL, listenConnection, &socketManager)) {
+
+    	if(pthread_create(&listenerThread, NULL, listenerFunc, &bnd)) {
             std::cerr<<"ERROR: failed to create the listening thread..."<<std::endl;
 		    return 1;
     	}
@@ -61,7 +108,7 @@ int main()
             // run the communication...
             commandManager.run();
         } else {
-            sleep(10);
+            sleep(1);
         }
 
     }

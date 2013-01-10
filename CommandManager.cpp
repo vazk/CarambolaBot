@@ -31,22 +31,22 @@ CommandManager::run()
                 std::cout<<"INFO: CMD [ack]"<<std::endl;
                 break;
             case Command::CMD_RESET:
-                std::cout<<"INFO: CMD [reset]"<<std::endl;
+                //std::cout<<"INFO: CMD [reset]"<<std::endl;
                 mMotorController.setSpeeds(0, 0);
                 break;
             case Command::CMD_DRIVE:
                 {
-                    std::cout<<"INFO CMD [drive]"<<std::endl;
+                    //std::cout<<"INFO CMD [drive]"<<std::endl;
                     uint8_t err = mMotorController.getErrors();
                     if(err) {
                         std::cout<<"ERROR: DualMotorController error: "<<err<<std::endl;
                     }
-                    mMotorController.setSpeeds(cmd.data.drive.left, cmd.data.drive.right);
+                    mMotorController.setSpeeds(-cmd.data.drive.left, cmd.data.drive.right);
                 }
                 break;
             case Command::CMD_QUIT:
                 mState = QUITTING;
-                std::cout<<"INFO: CMD [quit]"<<std::endl;
+                //std::cout<<"INFO: CMD [quit]"<<std::endl;
                 mMotorController.setSpeeds(0, 0);
                 break;
             default:

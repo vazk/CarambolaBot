@@ -1,4 +1,5 @@
 #include "SocketManager.hpp"
+#include "Utils.hpp"
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -45,6 +46,7 @@ SocketManager::waitForConnection(int port)
         return false;
     }
     mIsConnected = true;
+    mLastActivityMs = milliseconds();
     return true;
 }
 
@@ -73,6 +75,7 @@ SocketManager::connectToServer(const std::string& ip, int port)
         return false;
     }
     mIsConnected = true;
+    mLastActivityMs = milliseconds();
     return true;
 }
 
@@ -86,7 +89,8 @@ ssize_t
 SocketManager::write(const uint8_t* data, size_t size)
 {
     ssize_t numWrite = ::write(mConSocket, data, size);
-    mIsConnected = numWrite < 0;
+    mIsConnected = (numWrite == size);
+    mLastActivityMs = milliseconds();
     return numWrite;
 }
 
@@ -94,7 +98,8 @@ ssize_t
 SocketManager::read(uint8_t* data, size_t size)
 {
     ssize_t numRead = ::read(mConSocket, data, size);
-    mIsConnected = numRead < 0;
+    mIsConnected = (numRead == size);
+    mLastActivityMs = milliseconds();
     return numRead;
     
 }
@@ -102,7 +107,9 @@ SocketManager::read(uint8_t* data, size_t size)
 void 
 SocketManager::close()
 {
+    shutdown(mConSocket, 2);
     ::close(mConSocket);
+    shutdown(mSocket, 2);
     ::close(mSocket);
     mIsConnected = false;
 }

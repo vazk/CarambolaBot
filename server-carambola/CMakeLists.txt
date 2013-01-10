@@ -6,12 +6,12 @@
 SET(CMAKE_SYSTEM_NAME Carambola)
 
 # which compilers to use for C and C++
-SET(OPENWRT_TOOLCHAIN_PATH /opt/toolchain-mipsel_r2_gcc-4.7-linaro_uClibc-0.9.33.2/bin)
-SET(CMAKE_C_COMPILER   ${OPENWRT_TOOLCHAIN_PATH}/mipsel-openwrt-linux-gcc)
-SET(CMAKE_CXX_COMPILER ${OPENWRT_TOOLCHAIN_PATH}/mipsel-openwrt-linux-g++)
+SET(OPENWRT_TOOLCHAIN_PATH /opt/carambola/toolchain-mipsel_r2_gcc-4.7-linaro_uClibc-0.9.33.2)
+SET(CMAKE_C_COMPILER   ${OPENWRT_TOOLCHAIN_PATH}/bin/mipsel-openwrt-linux-gcc)
+SET(CMAKE_CXX_COMPILER ${OPENWRT_TOOLCHAIN_PATH}/bin/mipsel-openwrt-linux-g++)
 
 # here is the target environment located
-SET(CMAKE_FIND_ROOT_PATH /opt/toolchain-mipsel_r2_gcc-4.7-linaro_uClibc-0.9.33.2)
+SET(CMAKE_FIND_ROOT_PATH /opt/carambola/toolchain-mipsel_r2_gcc-4.7-linaro_uClibc-0.9.33.2)
 
 # search for programs in the build host directories
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
@@ -27,6 +27,7 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 SET(ROOT_DIR ..)
 SET(server_sources
     ${ROOT_DIR}/server.cpp         
+    ${ROOT_DIR}/Utils.cpp         
     ${ROOT_DIR}/SerialDevice.cpp
     ${ROOT_DIR}/DualMotorController.cpp
     ${ROOT_DIR}/CommandManager.cpp
