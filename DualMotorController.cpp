@@ -1,4 +1,5 @@
 #include "DualMotorController.hpp"
+#include "Logger.hpp"
 
 
 DualMotorController::DualMotorController(SerialDevice& device) 

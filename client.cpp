@@ -1,3 +1,4 @@
+#include "Logger.hpp"
 #include "Command.hpp"
 #include "SocketManager.hpp"
 #include <iostream>
@@ -44,7 +45,7 @@ int main(int argc, char *argv[])
             default : 
                 cmd.data.type = -1;
         }
-        std::cout<<"received command: "<< (char)cmd.data.type <<", executing..."<<std::endl;
+        LOG(LINFO)<<"received command: "<< (char)cmd.data.type <<", executing..."<<std::endl;
         socketManager.write(cmd.data.raw, Command::COMMAND_PACKET_LENGTH);
     }
     return 0;

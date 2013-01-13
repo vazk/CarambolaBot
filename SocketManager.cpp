@@ -1,4 +1,5 @@
 #include "SocketManager.hpp"
+#include "Logger.hpp"
 #include "Utils.hpp"
 #include <stdlib.h>
 #include <string.h>
@@ -22,12 +23,12 @@ SocketManager::waitForConnection(int port)
     struct sockaddr_in servAddr, cliAddr;
     mSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (mSocket < 0) {
-        std::cerr<<"ERROR: failed fo open socket"<<std::endl;
+        LOG(LERROR)<<"ERROR: failed fo open socket"<<std::endl;
         return false;
     }
     int on = 1;
     if(setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on)) < 0) {
-        std::cerr<<"ERROR: failed fo set socket options"<<std::endl;
+        LOG(LERROR)<<"ERROR: failed fo set socket options"<<std::endl;
         close();
         return false;
     }
@@ -36,7 +37,7 @@ SocketManager::waitForConnection(int port)
     servAddr.sin_addr.s_addr = INADDR_ANY;
     servAddr.sin_port = htons(port);
     if (bind(mSocket, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)  {
-        std::cerr<<"ERROR: failed to bind the socket." <<std::endl;
+        LOG(LERROR)<<"ERROR: failed to bind the socket." <<std::endl;
         close();
         return false;
     }
@@ -45,7 +46,7 @@ SocketManager::waitForConnection(int port)
     mConSocket = accept(mSocket, (struct sockaddr *) &cliAddr, &clilen);
     if (mConSocket < 0) {
         close();
-        std::cerr<<"ERROR: failed to accept."<<std::endl;
+        LOG(LERROR)<<"ERROR: failed to accept."<<std::endl;
         return false;
     }
     mIsConnected = true;
@@ -60,12 +61,12 @@ SocketManager::connectToServer(const std::string& ip, int port)
     close();
     mConSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (mConSocket < 0) {
-        std::cerr<<"ERROR: failed to open a socket."<<std::endl;
+        LOG(LERROR)<<"ERROR: failed to open a socket."<<std::endl;
         return false;
     }
     struct hostent* server = gethostbyname(ip.c_str());
     if (server == NULL) {
-        std::cerr<<"ERROR: no such host."<<std::endl;
+        LOG(LERROR)<<"ERROR: no such host."<<std::endl;
         return false;
     }
     sockaddr_in servAddr;
@@ -74,7 +75,7 @@ SocketManager::connectToServer(const std::string& ip, int port)
     bcopy((char*)server->h_addr, (char*)&servAddr.sin_addr.s_addr, server->h_length);
     servAddr.sin_port = htons(port);
     if (connect(mConSocket, (struct sockaddr *)& servAddr, sizeof(servAddr)) < 0)  {
-        std::cerr<<"ERROR: failed to connect..."<<std::endl;
+        LOG(LERROR)<<"ERROR: failed to connect..."<<std::endl;
         return false;
     }
     mIsConnected = true;

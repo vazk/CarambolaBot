@@ -1,4 +1,5 @@
 #include "SerialDevice.hpp"
+#include "Logger.hpp"
 #include <string.h>
 #include <unistd.h> 
 #include <fcntl.h> 
@@ -15,7 +16,7 @@ SerialDevice::~SerialDevice()
     // restoring the old device configuration...
     if(mDesc != INVALID_DESC) {
         tcsetattr(mDesc, TCSANOW, &mOrigPortSettings);   
-        std::cout<<"INFO: device configuration is restored..."<<std::endl;
+        LOG(LINFO)<<"INFO: device configuration is restored..."<<std::endl;
     }
 }
 
@@ -25,11 +26,11 @@ SerialDevice::open(const SerialDeviceConfig& cfg)
 	mDesc = ::open(cfg.deviceName.c_str(), O_RDWR | O_NOCTTY);
 	// if open is unsucessful
 	if(mDesc == -1) {
-		std::cout<<"ERROR: Unable to open "<<cfg.deviceName<<std::endl;
+		LOG(LERROR)<<"ERROR: Unable to open "<<cfg.deviceName<<std::endl;
         return false;
 	} else	{
 		fcntl(mDesc, F_SETFL, 0);
-		std::cout<<"INFO: successfully opened "<<cfg.deviceName<<std::endl;
+		LOG(LINFO)<<"INFO: successfully opened "<<cfg.deviceName<<std::endl;
 	}
 
     // now do the configuration
@@ -42,7 +43,7 @@ SerialDevice::open(const SerialDeviceConfig& cfg)
     cfmakeraw(&portSettings);
 	// apply the settings to the port
 	tcsetattr(mDesc, TCSANOW, &portSettings);   
-    std::cout<<"INFO: device is properly configured"<<std::endl;
+    LOG(LINFO)<<"INFO: device is properly configured"<<std::endl;
  
 	return true;
 

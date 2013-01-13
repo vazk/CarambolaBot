@@ -1,3 +1,4 @@
+#include "Logger.hpp"
 #include "SocketManager.hpp"
 #include "SerialDevice.hpp"
 #include "DualMotorController.hpp"
@@ -18,7 +19,7 @@ void* listenerFunc(void* bndp)
 {
     Bundle* bnd = (Bundle*)bndp;
     SocketManager* socketManager = bnd->sm;
-    std::cout<<"INFO: waiting for socket connection..."<<std::endl;
+    LOG(LINFO)<<"INFO: waiting for socket connection..."<<std::endl;
     socketManager->waitForConnection(9999);
     return NULL;
 }
@@ -37,11 +38,11 @@ void* watchdogFunc(void* bndp)
         uint32_t now = milliseconds();
         uint32_t lastActivity = socketManager->lastActivityMs();
         if(now - lastActivity > 2000) {
-            std::cout<<"WARN: nothing received within the last 2s, closing the connection..."<<std::endl;
+            LOG(LWARNING)<<"WARN: nothing received within the last 2s, closing the connection..."<<std::endl;
             socketManager->close();
         }
-        if(now - lastActivity > 300) {
-            std::cout<<"WARN: nothing received within the last 300ms, stopping the robot..."<<std::endl;
+        if(now - lastActivity > 500) {
+            LOG(LWARNING)<<"WARN: nothing received within the last 300ms, stopping the robot..."<<std::endl;
             motorController->setSpeeds(0, 0);
         } 
     }
@@ -67,8 +68,8 @@ int main()
     motorController.setConfigurationParameter(DualMotorController::QIK_CONFIG_SHUT_DOWN_MOTORS_ON_ERROR, 0);
     motorController.setConfigurationParameter(DualMotorController::QIK_CONFIG_SERIAL_TIMEOUT, 0);
 
-    std::cout<<"INFO: reading Qik error code: ["<<motorController.getErrors()<<"]"<<std::endl;
-    std::cout<<"INFO: reading Qik firmware version: ["<<motorController.getFirmwareVersion()<<"]"<<std::endl;
+    LOG(LINFO)<<"INFO: reading Qik error code: ["<<motorController.getErrors()<<"]"<<std::endl;
+    LOG(LINFO)<<"INFO: reading Qik firmware version: ["<<motorController.getFirmwareVersion()<<"]"<<std::endl;
 
     // instantiate the socket manager
     SocketManager socketManager;
@@ -86,7 +87,7 @@ int main()
 
 
     if(pthread_create(&watchdogThread, NULL, watchdogFunc, &bnd)) {
-        std::cerr<<"ERROR: failed to create the watchdog thread..."<<std::endl;
+        LOG(LERROR)<<"ERROR: failed to create the watchdog thread..."<<std::endl;
         return 1;
     }
 
@@ -94,17 +95,17 @@ int main()
     while(!commandManager.shouldQuit()) {
 
     	if(pthread_create(&listenerThread, NULL, listenerFunc, &bnd)) {
-            std::cerr<<"ERROR: failed to create the listening thread..."<<std::endl;
+            LOG(LERROR)<<"ERROR: failed to create the listening thread..."<<std::endl;
 		    return 1;
     	}
     	if(pthread_join(listenerThread, NULL)) {
     		//fprintf(stderr, "Error joining thread\n");
-            std::cerr<<"ERROR: failed to join the listening thread..."<<std::endl;
+            LOG(LERROR)<<"ERROR: failed to join the listening thread..."<<std::endl;
 	    	return 2;
     	}
 
         if(socketManager.isConnected()) {
-            std::cout<<"INFO: socket created, starting the communication..."<<std::endl;
+            LOG(LINFO)<<"INFO: socket created, starting the communication..."<<std::endl;
             // run the communication...
             commandManager.run();
         } else {

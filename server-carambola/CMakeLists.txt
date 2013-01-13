@@ -27,6 +27,7 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 SET(ROOT_DIR ..)
 SET(server_sources
     ${ROOT_DIR}/server.cpp         
+    ${ROOT_DIR}/Logger.cpp         
     ${ROOT_DIR}/Utils.cpp         
     ${ROOT_DIR}/SerialDevice.cpp
     ${ROOT_DIR}/DualMotorController.cpp
