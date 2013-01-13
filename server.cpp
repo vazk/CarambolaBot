@@ -6,21 +6,23 @@
 #include "Utils.hpp"
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <iostream>
+#include <fstream>
 
 struct Bundle {
     DualMotorController* dmc;
     SocketManager* sm;
-    pthread_t * listener;
+    int port;
 };
 
 void* listenerFunc(void* bndp)
 {
     Bundle* bnd = (Bundle*)bndp;
     SocketManager* socketManager = bnd->sm;
-    LOG(LINFO)<<"INFO: waiting for socket connection..."<<std::endl;
-    socketManager->waitForConnection(9999);
+    LOG(LINFO)<<"waiting for socket connection..."<<std::endl;
+    socketManager->waitForConnection(bndl->port);
     return NULL;
 }
 
@@ -49,9 +51,37 @@ void* watchdogFunc(void* bndp)
     return NULL;
 }
 
-
-int main()
+void printUsage(const std::string& progName)
 {
+    std::cout << "Usage: " << std::endl;
+    std::cout << progName << " -l <log-file> -p <server-port>" << std::endl;
+}
+
+int main(int argc, char **argv)
+{
+    const char* logFileName = "server.log";
+    int port = 9999;
+    int opt;
+    opterr = 0;    
+
+    while ((opt = getopt (argc, argv, "l:p:")) != -1) {
+        switch(opt) {
+            case 'l':
+                logFileName = optarg;
+                break;
+            case 'p':
+                port = atoi(optarg);
+                break;
+            case '?':
+                printUsage(argv[0]);
+                return 1;
+            default:
+                printUsage(argv[0]);
+                return 1;
+        }
+    }
+
+
     // define and configure device
     SerialDevice::SerialDeviceConfig cfg;
     cfg.baudRate = SerialDevice::SerialDeviceConfig::BAUD_38400;
@@ -59,6 +89,11 @@ int main()
 
     SerialDevice device;
     device.open(cfg);
+
+    std::ofstream logFile(logFileName);
+    Logger::initialize(LINFO, &logFile);
+
+    daemon(0,0);
     
     // instantiate the motor controller
     DualMotorController motorController(device);
@@ -68,8 +103,8 @@ int main()
     motorController.setConfigurationParameter(DualMotorController::QIK_CONFIG_SHUT_DOWN_MOTORS_ON_ERROR, 0);
     motorController.setConfigurationParameter(DualMotorController::QIK_CONFIG_SERIAL_TIMEOUT, 0);
 
-    LOG(LINFO)<<"INFO: reading Qik error code: ["<<motorController.getErrors()<<"]"<<std::endl;
-    LOG(LINFO)<<"INFO: reading Qik firmware version: ["<<motorController.getFirmwareVersion()<<"]"<<std::endl;
+    LOG(LINFO)<<"reading Qik error code: ["<<motorController.getErrors()<<"]"<<std::endl;
+    LOG(LINFO)<<"reading Qik firmware version: ["<<motorController.getFirmwareVersion()<<"]"<<std::endl;
 
     // instantiate the socket manager
     SocketManager socketManager;
@@ -83,11 +118,11 @@ int main()
     Bundle bnd;
     bnd.dmc = &motorController;
     bnd.sm = &socketManager;
-    bnd.listener = &listenerThread;
+    bnd.port = port;
 
 
     if(pthread_create(&watchdogThread, NULL, watchdogFunc, &bnd)) {
-        LOG(LERROR)<<"ERROR: failed to create the watchdog thread..."<<std::endl;
+        LOG(LERROR)<<"failed to create the watchdog thread..."<<std::endl;
         return 1;
     }
 
@@ -95,17 +130,17 @@ int main()
     while(!commandManager.shouldQuit()) {
 
     	if(pthread_create(&listenerThread, NULL, listenerFunc, &bnd)) {
-            LOG(LERROR)<<"ERROR: failed to create the listening thread..."<<std::endl;
+            LOG(LERROR)<<"failed to create the listening thread..."<<std::endl;
 		    return 1;
     	}
     	if(pthread_join(listenerThread, NULL)) {
     		//fprintf(stderr, "Error joining thread\n");
-            LOG(LERROR)<<"ERROR: failed to join the listening thread..."<<std::endl;
+            LOG(LERROR)<<"failed to join the listening thread..."<<std::endl;
 	    	return 2;
     	}
 
         if(socketManager.isConnected()) {
-            LOG(LINFO)<<"INFO: socket created, starting the communication..."<<std::endl;
+            LOG(LINFO)<<"socket created, starting the communication..."<<std::endl;
             // run the communication...
             commandManager.run();
         } else {
@@ -115,5 +150,4 @@ int main()
     }
 
 	return 0;
-
 }

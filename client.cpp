@@ -2,11 +2,13 @@
 #include "Command.hpp"
 #include "SocketManager.hpp"
 #include <iostream>
-
-#include <iostream>
+#include <fstream>
 
 int main(int argc, char *argv[])
 {
+    std::ofstream logFile("client.log");
+    Logger::initialize(LERROR, &logFile);
+
 
     SocketManager socketManager;
     if(socketManager.connectToServer("192.168.2.9", 9999) == false) {

@@ -2,6 +2,7 @@
 #include <string>
 #include <stdio.h>
 #include <time.h>
+#include <iostream>
 
 Logger::Logger() 
 {
@@ -10,7 +11,9 @@ Logger::Logger()
 Logger::~Logger()
 {
     pthread_mutex_lock(&sMutex); 
-    // do the initialization
+    if(sLogFile) {
+        (*sLogFile) << mBuffer.str() << std::flush;
+    }
     pthread_mutex_unlock(&sMutex); 
 }
 
@@ -42,14 +45,15 @@ Logger::isInitialized()
     return sInitialized;
 }
 void 
-Logger::initialize(LogLevel level)
-    
+Logger::initialize(LogLevel level, std::ofstream* logFile)
 {
     sLogLevel = level;
     pthread_mutex_init(&sMutex, NULL);
     sInitialized = true;
+    sLogFile = logFile;
 }
 
 LogLevel        Logger::sLogLevel;
 pthread_mutex_t Logger::sMutex;
 bool            Logger::sInitialized = false;
+std::ofstream*  Logger::sLogFile;

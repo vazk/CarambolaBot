@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include <sstream>
+#include <fstream>
 
 enum LogLevel {
         LNONE,
@@ -27,11 +28,12 @@ class Logger
 public:
     Logger();
     ~Logger();
-    std::ostringstream& os(LogLevel level = LERROR);
+    std::ostringstream& os(LogLevel level);
     
     static LogLevel level(); 
     static bool isInitialized();
-    static void initialize(LogLevel level);
+    static void initialize(LogLevel level,
+                           std::ofstream* logFile);
 
 private:
     std::ostringstream     mBuffer;
@@ -39,10 +41,11 @@ private:
     static LogLevel        sLogLevel;
     static pthread_mutex_t sMutex;
     static bool	           sInitialized;
+    static std::ofstream*  sLogFile;
 };
 
 #define LOG(llevel) \
-    if (llevel > Logger::level() && Logger::isInitialized()) ; \
+    if (llevel > Logger::level() && Logger::isInitialized()); \
     else Logger().os(llevel)
 
 #endif
