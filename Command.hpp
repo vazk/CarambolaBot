@@ -8,6 +8,7 @@ struct Command
     enum { COMMAND_PACKET_LENGTH = 8 };
     enum Type 
     {
+        CMD_HEARTBEAT,
         CMD_ACK,
         CMD_RESET,
         CMD_DRIVE,

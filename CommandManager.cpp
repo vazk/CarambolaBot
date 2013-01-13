@@ -27,6 +27,9 @@ CommandManager::run()
         }
 
         switch(cmd.data.type) {
+            case Command::CMD_HEARTBEAT:
+                std::cout<<"INFO: CMD [heart beat]"<<std::endl;
+                break;
             case Command::CMD_ACK:
                 std::cout<<"INFO: CMD [ack]"<<std::endl;
                 break;
@@ -36,7 +39,7 @@ CommandManager::run()
                 break;
             case Command::CMD_DRIVE:
                 {
-                    //std::cout<<"INFO CMD [drive]"<<std::endl;
+                    std::cout<<"INFO CMD [drive]"<<std::endl;
                     uint8_t err = mMotorController.getErrors();
                     if(err) {
                         std::cout<<"ERROR: DualMotorController error: "<<err<<std::endl;
