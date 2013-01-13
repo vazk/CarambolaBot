@@ -28,6 +28,7 @@ SocketManager::waitForConnection(int port)
     int on = 1;
     if(setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on)) < 0) {
         std::cerr<<"ERROR: failed fo set socket options"<<std::endl;
+        close();
         return false;
     }
     bzero((char*)&servAddr, sizeof(servAddr));
@@ -36,12 +37,14 @@ SocketManager::waitForConnection(int port)
     servAddr.sin_port = htons(port);
     if (bind(mSocket, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)  {
         std::cerr<<"ERROR: failed to bind the socket." <<std::endl;
+        close();
         return false;
     }
     listen(mSocket,5);
     socklen_t clilen = sizeof(cliAddr);
     mConSocket = accept(mSocket, (struct sockaddr *) &cliAddr, &clilen);
     if (mConSocket < 0) {
+        close();
         std::cerr<<"ERROR: failed to accept."<<std::endl;
         return false;
     }
