@@ -22,7 +22,7 @@ void* listenerFunc(void* bndp)
     Bundle* bnd = (Bundle*)bndp;
     SocketManager* socketManager = bnd->sm;
     LOG(LINFO)<<"waiting for socket connection..."<<std::endl;
-    socketManager->waitForConnection(bndl->port);
+    socketManager->waitForConnection(bnd->port);
     return NULL;
 }
 
