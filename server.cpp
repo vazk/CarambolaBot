@@ -39,11 +39,11 @@ void* watchdogFunc(void* bndp)
         }
         uint32_t now = milliseconds();
         uint32_t lastActivity = socketManager->lastActivityMs();
-        if(now - lastActivity > 2000) {
+        if(now - lastActivity > 3000) {
             LOG(LWARNING)<<"WARN: nothing received within the last 2s, closing the connection..."<<std::endl;
             socketManager->close();
         }
-        if(now - lastActivity > 500) {
+        if(now - lastActivity > 800) {
             LOG(LWARNING)<<"WARN: nothing received within the last 300ms, stopping the robot..."<<std::endl;
             motorController->setSpeeds(0, 0);
         } 
@@ -120,7 +120,6 @@ int main(int argc, char **argv)
     bnd.sm = &socketManager;
     bnd.port = port;
 
-
     if(pthread_create(&watchdogThread, NULL, watchdogFunc, &bnd)) {
         LOG(LERROR)<<"failed to create the watchdog thread..."<<std::endl;
         return 1;
@@ -134,7 +133,6 @@ int main(int argc, char **argv)
 		    return 1;
     	}
     	if(pthread_join(listenerThread, NULL)) {
-    		//fprintf(stderr, "Error joining thread\n");
             LOG(LERROR)<<"failed to join the listening thread..."<<std::endl;
 	    	return 2;
     	}
