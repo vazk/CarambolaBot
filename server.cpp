@@ -87,8 +87,8 @@ int main(int argc, char **argv)
     cfg.baudRate = SerialDevice::SerialDeviceConfig::BAUD_38400;
     cfg.deviceName = "/dev/ttyS0";
 
-    SerialDevice device;
-    device.open(cfg);
+    SerialDevice serialDevice;
+    serialDevice.open(cfg);
 
     std::ofstream logFile(logFileName);
     Logger::initialize(LINFO, &logFile);
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
     daemon(0,0);
     
     // instantiate the motor controller
-    DualMotorController motorController(device);
+    DualMotorController motorController(serialDevice);
 
     motorController.setConfigurationParameter(DualMotorController::QIK_CONFIG_DEVICE_ID, 9);
     motorController.setConfigurationParameter(DualMotorController::QIK_CONFIG_PWM_PARAMETER, 1);
@@ -144,8 +144,9 @@ int main(int argc, char **argv)
         } else {
             sleep(1);
         }
-
     }
+
+    serialDevice.close();
 
 	return 0;
 }

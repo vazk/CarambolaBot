@@ -16,6 +16,7 @@ CommandManager::run()
     mState = RUNNING;
     Command cmd;
 
+    LOG(LINFO)<<"Starting command processing loop...."<<std::endl;
     while(mState == RUNNING) {
         int n = mSocketManager.read(cmd.data.raw, Command::COMMAND_PACKET_LENGTH);
         if (n < 0) {
