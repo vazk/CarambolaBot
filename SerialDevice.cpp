@@ -13,17 +13,13 @@ SerialDevice::SerialDevice()
 
 SerialDevice::~SerialDevice()
 {
-    // restoring the old device configuration...
-    if(mDesc != INVALID_DESC) {
-        tcsetattr(mDesc, TCSANOW, &mOrigPortSettings);   
-        LOG(LINFO)<<"device configuration is restored..."<<std::endl;
-    }
+    close();
 }
 
 bool
 SerialDevice::open(const SerialDeviceConfig& cfg)
 {
-	mDesc = ::open(cfg.deviceName.c_str(), O_RDWR | O_NOCTTY);
+	mDesc = ::open(cfg.deviceName.c_str(), O_RDWR);
 	// if open is unsucessful
 	if(mDesc == -1) {
 		LOG(LERROR)<<"Unable to open "<<cfg.deviceName<<std::endl;
@@ -42,7 +38,7 @@ SerialDevice::open(const SerialDeviceConfig& cfg)
     cfsetospeed(&portSettings, cfg.baudRate);
     cfmakeraw(&portSettings);
 	// apply the settings to the port
-	tcsetattr(mDesc, TCSANOW, &portSettings);   
+    tcsetattr(mDesc, TCSANOW, &portSettings);   
     LOG(LINFO)<<"device is properly configured"<<std::endl;
  
 	return true;
@@ -82,6 +78,12 @@ SerialDevice::close()
     if(mDesc != INVALID_DESC) {
         ::close(mDesc);
     }
+    // restoring the old device configuration...
+    if(mDesc != INVALID_DESC) {
+        tcsetattr(mDesc, TCSANOW, &mOrigPortSettings);   
+        LOG(LINFO)<<"device configuration is restored..."<<std::endl;
+    }
+    mDesc = INVALID_DESC;
 }
 
 
