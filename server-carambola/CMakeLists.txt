@@ -34,6 +34,7 @@ SET(server_sources
     ${ROOT_DIR}/DualMotorController.cpp
     ${ROOT_DIR}/CommandManager.cpp
     ${ROOT_DIR}/SocketManager.cpp
+    ${ROOT_DIR}/RobotService.cpp
 )
 
 #INCLUDE_DIRECTORIES(${ROOT_DIR})
