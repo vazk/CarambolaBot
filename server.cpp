@@ -36,11 +36,11 @@ int main(int argc, char **argv)
     }
 
     // define and configure device
-    SerialDevice::SerialDeviceConfig cfg;
-    cfg.baudRate = SerialDevice::SerialDeviceConfig::BAUD_38400;
+    UARTDevice::UARTDeviceConfig cfg;
+    cfg.baudRate = UARTDevice::UARTDeviceConfig::BAUD_38400;
     cfg.deviceName = "/dev/ttyS0";
 
-    SerialDevice serialDevice;
+    UARTDevice serialDevice;
     serialDevice.open(cfg);
 
     std::ofstream logFile(logFileName);

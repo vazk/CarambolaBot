@@ -2,7 +2,7 @@
 #include "Logger.hpp"
 
 
-DualMotorController::DualMotorController(SerialDevice& device) 
+DualMotorController::DualMotorController(UARTDevice& device) 
  : mDevice(device)
 {
 }

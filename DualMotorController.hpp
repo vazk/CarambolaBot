@@ -4,7 +4,7 @@
 #ifndef DUAL_MOTOR_CONTROLLER_HPP
 #define DUAL_MOTOR_CONTROLLER_HPP 
 
-#include "SerialDevice.hpp"
+#include "UARTDevice.hpp"
 
 class DualMotorController
 {
@@ -52,7 +52,7 @@ public:
     };
 
 public:
-    DualMotorController(SerialDevice& device);
+    DualMotorController(UARTDevice& device);
 
     uint8_t getFirmwareVersion();
     uint8_t getErrors();
@@ -69,7 +69,7 @@ public:
     void setCoasts();
 
 protected:
-    SerialDevice& mDevice;
+    UARTDevice& mDevice;
 };
 
 #endif // DUAL_MOTOR_CONTROLLER_HPP

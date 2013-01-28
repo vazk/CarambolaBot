@@ -1,7 +1,7 @@
 #ifndef COMMAND_MANAGER_HPP
 #define COMMAND_MANAGER_HPP
 
-#include "SocketManager.hpp"
+#include "SocketDevice.hpp"
 #include "DualMotorController.hpp"
 
 
@@ -15,13 +15,13 @@ class CommandManager
     };
 
 public:
-    CommandManager(SocketManager& sm, DualMotorController& dmc);
+    CommandManager(SocketDevice& sm, DualMotorController& dmc);
     bool run();
     bool shouldQuit();
 
 private:
     State                mState;
-    SocketManager&       mSocketManager;
+    SocketDevice&        mSocketDevice;
     DualMotorController& mMotorController;
 };
 

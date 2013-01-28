@@ -31,9 +31,10 @@ SET(server_sources
     ${ROOT_DIR}/Logger.cpp         
     ${ROOT_DIR}/Utils.cpp         
     ${ROOT_DIR}/SerialDevice.cpp
+    ${ROOT_DIR}/UARTDevice.cpp
     ${ROOT_DIR}/DualMotorController.cpp
     ${ROOT_DIR}/CommandManager.cpp
-    ${ROOT_DIR}/SocketManager.cpp
+    ${ROOT_DIR}/SocketDevice.cpp
     ${ROOT_DIR}/RobotService.cpp
 )
 

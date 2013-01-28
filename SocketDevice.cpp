@@ -1,4 +1,4 @@
-#include "SocketManager.hpp"
+#include "SocketDevice.hpp"
 #include "Logger.hpp"
 #include "Utils.hpp"
 #include <stdlib.h>
@@ -10,14 +10,8 @@
 #include <netdb.h> 
 #include <iostream>
 
-
-SocketManager::SocketManager()
- : mIsConnected(false)
-{
-}
-
 bool
-SocketManager::waitForConnection(int port)
+SocketDevice::waitForConnection(int port)
 {
     close();
     struct sockaddr_in servAddr, cliAddr;
@@ -43,29 +37,30 @@ SocketManager::waitForConnection(int port)
     }
     listen(mSocket,5);
     socklen_t clilen = sizeof(cliAddr);
-    mConSocket = accept(mSocket, (struct sockaddr *) &cliAddr, &clilen);
-    if (mConSocket < 0) {
+    mDesc = accept(mSocket, (struct sockaddr *) &cliAddr, &clilen);
+    if (mDesc < 0) {
         close();
         LOG(LERROR)<<"failed to accept."<<std::endl;
         return false;
     }
-    mIsConnected = true;
     mLastActivityMs = milliseconds();
     return true;
 }
 
 
 bool
-SocketManager::connectToServer(const std::string& ip, int port)
+SocketDevice::connectToServer(const std::string& ip, int port)
 {
     close();
-    mConSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (mConSocket < 0) {
+    mDesc = socket(AF_INET, SOCK_STREAM, 0);
+    if (mDesc < 0) {
+        close();
         LOG(LERROR)<<"failed to open a socket."<<std::endl;
         return false;
     }
     struct hostent* server = gethostbyname(ip.c_str());
     if (server == NULL) {
+        close();
         LOG(LERROR)<<"no such host."<<std::endl;
         return false;
     }
@@ -74,46 +69,21 @@ SocketManager::connectToServer(const std::string& ip, int port)
     servAddr.sin_family = AF_INET;
     bcopy((char*)server->h_addr, (char*)&servAddr.sin_addr.s_addr, server->h_length);
     servAddr.sin_port = htons(port);
-    if (connect(mConSocket, (struct sockaddr *)& servAddr, sizeof(servAddr)) < 0)  {
+    if (connect(mDesc, (struct sockaddr *)& servAddr, sizeof(servAddr)) < 0)  {
+        close();
         LOG(LERROR)<<"failed to connect..."<<std::endl;
         return false;
     }
-    mIsConnected = true;
     mLastActivityMs = milliseconds();
     return true;
 }
 
-bool 
-SocketManager::isConnected()
-{
-    return mIsConnected;
-}
-
-ssize_t
-SocketManager::write(const uint8_t* data, size_t size)
-{
-    ssize_t numWrite = ::write(mConSocket, data, size);
-    mIsConnected = (numWrite == (ssize_t)size);
-    mLastActivityMs = milliseconds();
-    return numWrite;
-}
-
-ssize_t
-SocketManager::read(uint8_t* data, size_t size)
-{
-    ssize_t numRead = ::read(mConSocket, data, size);
-    mIsConnected = (numRead == (ssize_t)size);
-    mLastActivityMs = milliseconds();
-    return numRead;
-    
-}
-
 void 
-SocketManager::close()
+SocketDevice::close()
 {
-    shutdown(mConSocket, 2);
-    ::close(mConSocket);
+    shutdown(mDesc, 2);
+    SerialDevice::close();
+
     shutdown(mSocket, 2);
     ::close(mSocket);
-    mIsConnected = false;
 }

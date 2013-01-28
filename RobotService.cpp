@@ -4,11 +4,11 @@
 #include <unistd.h>
 
 
-RobotService::RobotService(SerialDevice& device, int port)
+RobotService::RobotService(UARTDevice& device, int port)
  : mPort(port),
-   mSerialDevice(device),
-   mMotorController(mSerialDevice),
-   mCommandManager(mSocketManager, mMotorController)
+   mUARTDevice(device),
+   mMotorController(mUARTDevice),
+   mCommandManager(mSocketDevice, mMotorController)
 {
     mMotorController.setConfigurationParameter(DualMotorController::QIK_CONFIG_DEVICE_ID, 9);
     mMotorController.setConfigurationParameter(DualMotorController::QIK_CONFIG_PWM_PARAMETER, 1);
@@ -22,7 +22,7 @@ RobotService::RobotService(SerialDevice& device, int port)
 
 RobotService::~RobotService() 
 {
-    mSerialDevice.close();
+    mUARTDevice.close();
 }
 
 void 
@@ -45,7 +45,7 @@ RobotService::run()
             LOG(LERROR)<<"failed to join the listening thread..."<<std::endl;
             return;
         }
-        if(mSocketManager.isConnected()) {
+        if(mSocketDevice.isOpen()) {
             LOG(LINFO)<<"socket created, starting the communication..."<<std::endl;
             // run the communication...
             mCommandManager.run();
@@ -59,7 +59,7 @@ void*
 RobotService::listenerFunc(void* pthis)
 {
     RobotService* robot = (RobotService*)pthis;
-    SocketManager& socketManager = robot->mSocketManager;
+    SocketDevice& socketManager = robot->mSocketDevice;
     LOG(LINFO)<<"waiting for socket connection..."<<std::endl;
     socketManager.waitForConnection(robot->mPort);
     return NULL;
@@ -69,12 +69,12 @@ RobotService::listenerFunc(void* pthis)
 void* 
 RobotService::watchdogFunc(void* pthis)
 {
-RobotService* robot = (RobotService*)pthis;
+    RobotService* robot = (RobotService*)pthis;
     DualMotorController& motorController = robot->mMotorController;
-    SocketManager& socketManager = robot->mSocketManager;
+    SocketDevice& socketManager = robot->mSocketDevice;
     while(true) {
         usleep(100 * 1000);
-        if(!socketManager.isConnected()) {
+        if(!socketManager.isOpen()) {
             continue;
         }
         uint32_t now = milliseconds();

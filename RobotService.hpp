@@ -1,8 +1,8 @@
 #ifndef ROBOT_SERVICE_HPP
 #define ROBOT_SERVICE_HPP
 
-#include "SocketManager.hpp"
-#include "SerialDevice.hpp"
+#include "SocketDevice.hpp"
+#include "UARTDevice.hpp"
 #include "DualMotorController.hpp"
 #include "CommandManager.hpp"
 #include "Utils.hpp"
@@ -10,7 +10,7 @@
 class RobotService 
 {
 public:
-    RobotService(SerialDevice& device, int port);
+    RobotService(UARTDevice& device, int port);
     ~RobotService();
     void run();
 
@@ -20,13 +20,11 @@ private:
 
 private:
     int mPort;
-    SerialDevice        mSerialDevice;
-    SocketManager       mSocketManager;
+    UARTDevice          mUARTDevice;
+    SocketDevice        mSocketDevice;
     DualMotorController mMotorController;
     CommandManager      mCommandManager;
 };
-
-
 
 
 #endif //ROBOT_SERVICE_HPP

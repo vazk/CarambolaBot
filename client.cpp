@@ -1,6 +1,6 @@
 #include "Logger.hpp"
 #include "Command.hpp"
-#include "SocketManager.hpp"
+#include "SocketDevice.hpp"
 #include <iostream>
 #include <fstream>
 
@@ -10,8 +10,8 @@ int main(int argc, char *argv[])
     Logger::initialize(LERROR, &logFile);
 
 
-    SocketManager socketManager;
-    if(socketManager.connectToServer("192.168.2.9", 9999) == false) {
+    SocketDevice socketDevice;
+    if(socketDevice.connectToServer("192.168.2.9", 9999) == false) {
         return 1;
     };
 
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
                 cmd.data.type = -1;
         }
         LOG(LINFO)<<"received command: "<< (char)cmd.data.type <<", executing..."<<std::endl;
-        socketManager.write(cmd.data.raw, Command::COMMAND_PACKET_LENGTH);
+        socketDevice.write(cmd.data.raw, Command::COMMAND_PACKET_LENGTH);
     }
     return 0;
 }

@@ -3,9 +3,9 @@
 #include "Command.hpp"
 #include <iostream>
 
-CommandManager::CommandManager(SocketManager& sm, DualMotorController& dmc)
+CommandManager::CommandManager(SocketDevice& sm, DualMotorController& dmc)
  : mState(STARTING),
-   mSocketManager(sm),
+   mSocketDevice(sm),
    mMotorController(dmc)
 {
 }
@@ -18,7 +18,7 @@ CommandManager::run()
 
     LOG(LINFO)<<"Starting command processing loop...."<<std::endl;
     while(mState == RUNNING) {
-        int n = mSocketManager.read(cmd.data.raw, Command::COMMAND_PACKET_LENGTH);
+        int n = mSocketDevice.read(cmd.data.raw, Command::COMMAND_PACKET_LENGTH);
         if (n < 0) {
             LOG(LERROR)<<"failed to read from socket."<<std::endl;
             return false;
@@ -58,7 +58,7 @@ CommandManager::run()
                 LOG(LDEBUG)<<"CMD [invalid]"<<std::endl;
         }
     }
-    mSocketManager.close();
+    mSocketDevice.close();
     return true;
 }
 
