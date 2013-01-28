@@ -51,5 +51,5 @@ int main(int argc, char **argv)
     RobotService robot(serialDevice, port);
     robot.run();
 
-	return 0;
+    return 0;
 }

@@ -40,7 +40,7 @@ private:
     // static properties
     static LogLevel        sLogLevel;
     static pthread_mutex_t sMutex;
-    static bool	           sInitialized;
+    static bool            sInitialized;
     static std::ofstream*  sLogFile;
 };
 

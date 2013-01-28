@@ -19,29 +19,29 @@ SerialDevice::~SerialDevice()
 bool
 SerialDevice::open(const SerialDeviceConfig& cfg)
 {
-	mDesc = ::open(cfg.deviceName.c_str(), O_RDWR);
-	// if open is unsucessful
-	if(mDesc == -1) {
-		LOG(LERROR)<<"Unable to open "<<cfg.deviceName<<std::endl;
+    mDesc = ::open(cfg.deviceName.c_str(), O_RDWR);
+    // if open is unsucessful
+    if(mDesc == -1) {
+        LOG(LERROR)<<"Unable to open "<<cfg.deviceName<<std::endl;
         return false;
-	} else	{
-		fcntl(mDesc, F_SETFL, 0);
-		LOG(LINFO)<<"successfully opened "<<cfg.deviceName<<std::endl;
-	}
+    } else    {
+        fcntl(mDesc, F_SETFL, 0);
+        LOG(LINFO)<<"successfully opened "<<cfg.deviceName<<std::endl;
+    }
 
     // now do the configuration
-	struct termios portSettings;      // structure to store the port settings in
+    struct termios portSettings;      // structure to store the port settings in
     tcgetattr(0, &portSettings);
     memcpy(&mOrigPortSettings, &portSettings, sizeof(mOrigPortSettings));
     // set baud rates
-	cfsetispeed(&portSettings, cfg.baudRate);    	
+    cfsetispeed(&portSettings, cfg.baudRate);        
     cfsetospeed(&portSettings, cfg.baudRate);
     cfmakeraw(&portSettings);
-	// apply the settings to the port
+    // apply the settings to the port
     tcsetattr(mDesc, TCSANOW, &portSettings);   
     LOG(LINFO)<<"device is properly configured"<<std::endl;
  
-	return true;
+    return true;
 
 
 }
@@ -53,7 +53,7 @@ SerialDevice::write(const uint8_t* data, size_t size)
         return 0;
     }
     ssize_t numWrite = ::write(mDesc, data, size); 
-    if(numWrite != size) {
+    if(numWrite != (ssize_t)size) {
         mDesc = INVALID_DESC;
     }
     return numWrite;

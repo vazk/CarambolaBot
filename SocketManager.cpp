@@ -93,7 +93,7 @@ ssize_t
 SocketManager::write(const uint8_t* data, size_t size)
 {
     ssize_t numWrite = ::write(mConSocket, data, size);
-    mIsConnected = (numWrite == size);
+    mIsConnected = (numWrite == (ssize_t)size);
     mLastActivityMs = milliseconds();
     return numWrite;
 }
@@ -102,7 +102,7 @@ ssize_t
 SocketManager::read(uint8_t* data, size_t size)
 {
     ssize_t numRead = ::read(mConSocket, data, size);
-    mIsConnected = (numRead == size);
+    mIsConnected = (numRead == (ssize_t)size);
     mLastActivityMs = milliseconds();
     return numRead;
     
