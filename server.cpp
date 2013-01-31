@@ -44,9 +44,11 @@ int main(int argc, char **argv)
     serialDevice.open(cfg);
 
     std::ofstream logFile(logFileName);
-    Logger::initialize(LINFO, &logFile);
+    Logger::initialize(LDEBUG, &logFile);
 
-    daemon(0,0);
+    /// Disabling the daemonisation: since we now launch the process 
+    /// through inittab using respawn, it can not be a daemon.
+    //daemon(0,0);
 
     RobotService robot(serialDevice, port);
     robot.run();

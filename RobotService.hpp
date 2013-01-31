@@ -16,10 +16,12 @@ public:
 
 private:
     static void* listenerFunc(void* pthis);
+    static void* keepaliveFunc(void* pthis);
     static void* watchdogFunc(void* pthis);
 
 private:
-    int mPort;
+    bool mIsInitialized;
+    int  mPort;
     UARTDevice          mUARTDevice;
     SocketDevice        mSocketDevice;
     DualMotorController mMotorController;
